@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: frontend-service
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: bank-frontend
+            client-secret: iLQC3LFCKyEbtqrfYqROhGkbxdMBLbCS
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8180/realms/bank
+            user-name-attribute: preferred_username
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    com.bank.frontend: DEBUG

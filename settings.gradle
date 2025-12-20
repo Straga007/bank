@@ -1,0 +1,6 @@
+rootProject.name = 'bank-app'
+
+include 'authorization-service'
+include 'frontend-service'
+include 'combined-service'
+include 'gateway-service'
