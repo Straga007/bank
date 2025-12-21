@@ -2,8 +2,6 @@ server:
   port: 9000
 
 spring:
-  application:
-    name: authorization-service
   security:
     oauth2:
       client:
@@ -21,12 +19,3 @@ spring:
           keycloak:
             issuer-uri: http://localhost:8180/realms/bank
             user-name-attribute: preferred_username
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
-    cache: false
-
-logging:
-  level:
-    org.springframework.security: DEBUG
-    com.bank.authorization: DEBUG

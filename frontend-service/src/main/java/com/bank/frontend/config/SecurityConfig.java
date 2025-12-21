@@ -15,14 +15,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/oauth2/**", "/login/oauth2/**", "/logout", "/error", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/", "/login", "/register", "/oauth2/**", "/login/oauth2/**", "/logout", "/error", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionFixation().migrateSession()
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/login/oauth2/**")
+                .ignoringRequestMatchers("/login/oauth2/**", "/register")
             )
             .oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("/dashboard", true)

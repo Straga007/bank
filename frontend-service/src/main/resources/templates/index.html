@@ -26,7 +26,7 @@
             color: #667eea;
             margin-bottom: 20px;
         }
-        .btn-login {
+        .btn-login, .btn-register {
             background: #667eea;
             color: white;
             padding: 12px 30px;
@@ -35,11 +35,26 @@
             display: inline-block;
             margin-top: 20px;
             transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-register {
+            background: #764ba2;
+        }
+        .btn-login:hover, .btn-register:hover {
+            transform: translateY(-2px);
         }
         .btn-login:hover {
             background: #764ba2;
-            color: white;
-            transform: translateY(-2px);
+        }
+        .btn-register:hover {
+            background: #667eea;
+        }
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
     </style>
 </head>
@@ -50,9 +65,15 @@
         <p class="text-muted mb-4">
             Современный банкинг с безопасной авторизацией через OAuth2
         </p>
-        <a href="/oauth2/authorization/keycloak" class="btn-login">
-            Войти в личный кабинет
-        </a>
+        
+        <div class="buttons-container">
+            <a href="/oauth2/authorization/keycloak" class="btn-login">
+                Войти в личный кабинет
+            </a>
+            <a href="/register" class="btn-register">
+                Зарегистрироваться
+            </a>
+        </div>
 
         <div class="mt-4 text-muted small">
             <p>Используйте тестовые учетные данные:</p>

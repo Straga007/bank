@@ -1,7 +1,6 @@
-server:
-  port: 8000
-
 spring:
+  application:
+    name: gateway-service
   cloud:
     gateway:
       discovery:
@@ -37,3 +36,16 @@ spring:
             - Path=/api/accounts/public/**
           filters:
             - StripPrefix=2
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    com.bank.gateway: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true

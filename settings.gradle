@@ -2,5 +2,7 @@ rootProject.name = 'bank-app'
 
 include 'authorization-service'
 include 'frontend-service'
-include 'combined-service'
 include 'gateway-service'
+include 'accounts-service'
+include 'eureka-service'
+include 'config-service'

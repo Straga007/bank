@@ -2,8 +2,6 @@ server:
   port: 8080
 
 spring:
-  application:
-    name: frontend-service
   security:
     oauth2:
       client:
@@ -26,8 +24,12 @@ spring:
     suffix: .html
     cache: false
 
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    com.bank.frontend: DEBUG
+keycloak:
+  auth-server-url: http://localhost:8180
+  realm: bank
+
+keycloak-admin:
+  username: admin
+  password: admin
+  client-id: admin-cli
+  client-secret:
