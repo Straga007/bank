@@ -1,0 +1,16 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: accounts-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/bank
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.bank.accounts: DEBUG

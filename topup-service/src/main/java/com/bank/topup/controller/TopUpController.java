@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/topup")
+@RequestMapping("/") // Изменено с "/api/topup" на "/"
 public class TopUpController {
 
     private final AccountsServiceClient accountsServiceClient;
@@ -25,7 +25,7 @@ public class TopUpController {
         this.accountsServiceClient = accountsServiceClient;
     }
 
-    @PostMapping("/balance")
+    @PostMapping("/balance") // Изменено с "/api/topup/balance" на "/balance"
     public Mono<ResponseEntity<Map<String, Object>>> topUpBalance(
             @AuthenticationPrincipal Jwt jwt,
             @RegisteredOAuth2AuthorizedClient("keycloak") OAuth2AuthorizedClient authorizedClient,
