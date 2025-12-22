@@ -29,6 +29,12 @@ spring:
             - Path=/api/cash/**
           filters:
             - StripPrefix=2
+        - id: topup-service
+          uri: http://localhost:8094
+          predicates:
+            - Path=/api/topup/**
+          filters:
+            - StripPrefix=2
         - id: transfer-service
           uri: http://localhost:8092
           predicates:
