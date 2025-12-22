@@ -16,6 +16,10 @@
                     </div>
                     <div class="card-body text-center">
                         <p>Для входа в систему используется OAuth2 авторизация.</p>
+                        <!-- Отображение ошибки, если она есть -->
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.
+                        </div>
                         <a href="/oauth2/authorization/keycloak" class="btn btn-primary btn-lg">
                             Войти через OAuth2
                         </a>

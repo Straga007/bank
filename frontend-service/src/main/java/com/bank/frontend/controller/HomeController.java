@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 public class HomeController {
@@ -45,7 +46,7 @@ public class HomeController {
         }
         
         // Перенаправляем на стандартную форму регистрации Keycloak
-        return "redirect:/oauth2/authorization/keycloak?prompt=register";
+        return "redirect:http://localhost:8180/realms/bank/protocol/openid-connect/registrations?client_id=bank-frontend&response_type=code&scope=openid%20profile%20email&redirect_uri=http://localhost:8080/login/oauth2/code/keycloak";
     }
 
     @GetMapping("/dashboard")
@@ -57,21 +58,24 @@ public class HomeController {
 
         Map<String, Object> attributes = principal.getAttributes();
 
+        // Генерируем уникальный номер счета на основе имени пользователя
+        String username = (String) attributes.getOrDefault("preferred_username", "unknown");
+        String accountNumber = "40702810" + Math.abs(username.hashCode()) % 10000000000L;
+        if (accountNumber.length() > 20) {
+            accountNumber = accountNumber.substring(0, 20);
+        }
+
         model.addAttribute("user", Map.of(
-            "name", attributes.getOrDefault("name", "Иван Иванов"),
-            "email", attributes.getOrDefault("email", "ivan@bank.com"),
-            "accountNumber", "40702810000000012345",
-            "balance", "1 250 000 ₽",
+            "name", attributes.getOrDefault("name", username),
+            "email", attributes.getOrDefault("email", ""),
+            "accountNumber", accountNumber,
+            "balance", "0 ₽",
             "currency", "RUB",
-            "lastLogin", "Сегодня, 14:30"
+            "lastLogin", "Сегодня"
         ));
 
-        model.addAttribute("transactions", java.util.List.of(
-            Map.of("date", "2024-01-15", "description", "Перевод на карту", "amount", "-15 000 ₽"),
-            Map.of("date", "2024-01-14", "description", "Зарплата", "amount", "+85 000 ₽"),
-            Map.of("date", "2024-01-10", "description", "Оплата услуг", "amount", "-5 200 ₽"),
-            Map.of("date", "2024-01-05", "description", "Кэшбэк", "amount", "+1 500 ₽")
-        ));
+        // Для новых пользователей список транзакций пуст
+        model.addAttribute("transactions", java.util.List.of());
 
         return "dashboard";
     }
