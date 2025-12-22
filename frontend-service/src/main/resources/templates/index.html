@@ -41,6 +41,21 @@
             color: white;
             transform: translateY(-2px);
         }
+        .btn-register {
+            background: #28a745;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        .btn-register:hover {
+            background: #218838;
+            color: white;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -52,6 +67,10 @@
         </p>
         <a href="/oauth2/authorization/keycloak" class="btn-login">
             Войти в личный кабинет
+        </a>
+        <br>
+        <a href="/register" class="btn-register">
+            Зарегистрироваться
         </a>
 
         <div class="mt-4 text-muted small">

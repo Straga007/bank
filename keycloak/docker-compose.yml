@@ -9,5 +9,7 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./bank-realm-config.json:/opt/keycloak/data/import/bank-realm-config.json
     command:
-      - start-dev
+      - start-dev --import-realm

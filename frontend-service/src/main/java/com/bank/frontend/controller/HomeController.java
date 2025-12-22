@@ -37,6 +37,17 @@ public class HomeController {
         return "login";
     }
 
+    @GetMapping("/register")
+    public String registerPage(@AuthenticationPrincipal OAuth2User principal) {
+        // Если пользователь уже аутентифицирован, редиректим на dashboard
+        if (principal != null) {
+            return "redirect:/dashboard";
+        }
+        
+        // Перенаправляем на стандартную форму регистрации Keycloak
+        return "redirect:/oauth2/authorization/keycloak?prompt=register";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal OAuth2User principal, Model model) {
         // Если не аутентифицирован, редиректим на login
