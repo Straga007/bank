@@ -1,5 +1,7 @@
 package com.bank.topup.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,8 @@ import java.util.Map;
 @Component
 public class AccountsServiceClient {
 
+    private static final Logger logger = LoggerFactory.getLogger(AccountsServiceClient.class);
+
     private final WebClient webClient;
 
     public AccountsServiceClient(WebClient.Builder webClientBuilder) {
@@ -21,10 +25,14 @@ public class AccountsServiceClient {
     }
 
     public Mono<Map> updateAccountBalance(String accessToken, String userId, BigDecimal amount) {
+        logger.info("Отправка запроса на обновление баланса: userId={}, amount={}", userId, amount);
+        
         Map<String, Object> requestBody = Map.of(
                 "userId", userId,
                 "amount", amount
         );
+
+        logger.info("Тело запроса: {}", requestBody);
 
         return webClient.post()
                 .uri("/balance/update")
@@ -32,6 +40,8 @@ public class AccountsServiceClient {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(Map.class);
+                .bodyToMono(Map.class)
+                .doOnSuccess(response -> logger.info("Получен ответ от Accounts сервиса: {}", response))
+                .doOnError(error -> logger.error("Ошибка при вызове Accounts сервиса", error));
     }
 }

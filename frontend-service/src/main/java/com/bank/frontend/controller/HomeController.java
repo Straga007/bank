@@ -1,6 +1,11 @@
 package com.bank.frontend.controller;
 
+import com.bank.frontend.service.UserDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,10 +13,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
-import java.util.UUID;
 
 @Controller
 public class HomeController {
+
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+    
+    private final UserDataService userDataService;
+
+    public HomeController(UserDataService userDataService) {
+        this.userDataService = userDataService;
+    }
 
     @GetMapping("/")
     public String home(@AuthenticationPrincipal OAuth2User principal) {
@@ -50,29 +62,20 @@ public class HomeController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(@AuthenticationPrincipal OAuth2User principal, Model model) {
+    public String dashboard(
+            @AuthenticationPrincipal OAuth2User principal,
+            @RegisteredOAuth2AuthorizedClient("keycloak") OAuth2AuthorizedClient authorizedClient,
+            Model model) {
         // Если не аутентифицирован, редиректим на login
         if (principal == null) {
             return "redirect:/login";
         }
 
-        Map<String, Object> attributes = principal.getAttributes();
+        // Получаем данные пользователя через сервис
+        Map<String, Object> dashboardData = userDataService.getUserDashboardData(principal, authorizedClient);
 
-        // Генерируем уникальный номер счета на основе имени пользователя
-        String username = (String) attributes.getOrDefault("preferred_username", "unknown");
-        String accountNumber = "40702810" + Math.abs(username.hashCode()) % 10000000000L;
-        if (accountNumber.length() > 20) {
-            accountNumber = accountNumber.substring(0, 20);
-        }
-
-        model.addAttribute("user", Map.of(
-            "name", attributes.getOrDefault("name", username),
-            "email", attributes.getOrDefault("email", ""),
-            "accountNumber", accountNumber,
-            "balance", "0 ₽",
-            "currency", "RUB",
-            "lastLogin", "Сегодня"
-        ));
+        // Добавляем основные данные пользователя
+        model.addAllAttributes(dashboardData);
 
         // Для новых пользователей список транзакций пуст
         model.addAttribute("transactions", java.util.List.of());

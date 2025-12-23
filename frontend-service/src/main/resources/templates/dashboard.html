@@ -35,6 +35,10 @@
             border-radius: 5px;
             margin-top: 20px;
         }
+        .balance-error {
+            color: #dc3545;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +65,10 @@
                 <div class="col-md-6">
                     <h5>Текущий баланс</h5>
                     <h1 class="display-4" th:text="${user.balance}">1 250 000 ₽</h1>
+                    <!-- Отображение сообщения об ошибке при получении баланса -->
+                    <div th:if="${balanceError}" class="balance-error">
+                        <small>⚠️ <span th:text="${balanceError}">Ошибка при получении баланса</span></small>
+                    </div>
                     <p class="text-muted">Счет: <span th:text="${user.accountNumber}">40702810000000012345</span></p>
                 </div>
                 <div class="col-md-6">

@@ -1,6 +1,8 @@
 package com.bank.topup.controller;
 
 import com.bank.topup.client.AccountsServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,8 +18,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/") // Изменено с "/api/topup" на "/"
+@RequestMapping("/")
 public class TopUpController {
+
+    private static final Logger logger = LoggerFactory.getLogger(TopUpController.class);
 
     private final AccountsServiceClient accountsServiceClient;
 
@@ -25,11 +29,13 @@ public class TopUpController {
         this.accountsServiceClient = accountsServiceClient;
     }
 
-    @PostMapping("/balance") // Изменено с "/api/topup/balance" на "/balance"
+    @PostMapping("/balance")
     public Mono<ResponseEntity<Map<String, Object>>> topUpBalance(
             @AuthenticationPrincipal Jwt jwt,
             @RegisteredOAuth2AuthorizedClient("keycloak") OAuth2AuthorizedClient authorizedClient,
             @RequestBody Map<String, Object> request) {
+        
+        logger.info("Получен запрос на пополнение баланса: {}", request);
         
         // Получаем сумму пополнения из запроса
         BigDecimal amount = new BigDecimal(request.get("amount").toString());
@@ -42,9 +48,15 @@ public class TopUpController {
         String userEmail = jwt.getClaimAsString("email");
         String userName = jwt.getClaimAsString("preferred_username");
         
+        logger.info("Пополнение баланса для пользователя: userId={}, userName={}, userEmail={}, amount={}", userId, userName, userEmail, amount);
+        
         // Вызываем Accounts сервис для обновления баланса
         return accountsServiceClient.updateAccountBalance(serviceToken, userId, amount)
+                .doOnSuccess(accountsResponse -> logger.info("Баланс успешно обновлен для пользователя: {}", userId))
+                .doOnError(error -> logger.error("Ошибка при обновлении баланса для пользователя: {}", userId, error))
                 .map(accountsResponse -> {
+                    logger.info("Получен ответ от Accounts сервиса: {}", accountsResponse);
+                    
                     // Создаем ответ
                     Map<String, Object> response = new HashMap<>();
                     response.put("message", "Баланс успешно пополнен");
@@ -55,6 +67,7 @@ public class TopUpController {
                     response.put("transactionId", UUID.randomUUID().toString());
                     response.put("accountsServiceResponse", accountsResponse);
                     
+                    logger.info("Отправляем ответ пользователю: {}", response);
                     return ResponseEntity.ok(response);
                 })
                 .onErrorReturn(ResponseEntity.internalServerError().build());
