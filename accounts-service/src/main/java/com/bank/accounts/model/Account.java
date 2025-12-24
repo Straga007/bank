@@ -11,6 +11,9 @@ public class Account {
     @Column(name = "user_id")
     private String userId;
     
+    @Column(name = "username", unique = true) // Добавляем поле username
+    private String username;
+    
     @Column(name = "first_name")
     private String firstName;
     
@@ -26,8 +29,9 @@ public class Account {
     // для JPA
     public Account() {}
     
-    public Account(String userId, String firstName, String lastName, LocalDate birthDate, BigDecimal balance) {
+    public Account(String userId, String username, String firstName, String lastName, LocalDate birthDate, BigDecimal balance) {
         this.userId = userId;
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
@@ -40,6 +44,14 @@ public class Account {
     
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+    
+    public String getUsername() {
+        return username;
+    }
+    
+    public void setUsername(String username) {
+        this.username = username;
     }
     
     public String getFirstName() {

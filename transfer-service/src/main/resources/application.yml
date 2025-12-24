@@ -1,0 +1,31 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: transfer-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/bank
+      client:
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: bank-transfer-service
+            client-secret: transferServiceSecret
+            authorization-grant-type: client_credentials
+            scope: openid,profile,email,roles
+        provider:
+          keycloak:
+            token-uri: http://localhost:8180/realms/bank/protocol/openid-connect/token
+
+account:
+  service:
+
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.bank.transfer: DEBUG

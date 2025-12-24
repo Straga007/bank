@@ -1,4 +1,4 @@
-package com.bank.accounts.config;
+package com.bank.transfer.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +14,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/balance/update").hasAnyAuthority("SCOPE_openid", "SCOPE_email", "SCOPE_profile")
-                .requestMatchers("/transfer-by-username").hasAnyAuthority("SCOPE_openid", "SCOPE_email", "SCOPE_profile")
-                .requestMatchers("/balance/**").authenticated()
-                .requestMatchers("/**").authenticated()
+                .requestMatchers("/transfer/**").authenticated()
+                .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> {})

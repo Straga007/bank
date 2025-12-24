@@ -24,11 +24,12 @@ public class AccountsServiceClient {
                 .build();
     }
 
-    public Mono<Map> updateAccountBalance(String accessToken, String userId, BigDecimal amount) {
-        logger.info("Отправка запроса на обновление баланса: userId={}, amount={}", userId, amount);
+    public Mono<Map> updateAccountBalance(String accessToken, String userId, String username, BigDecimal amount) {
+        logger.info("Отправка запроса на обновление баланса: userId={}, username={}, amount={}", userId, username, amount);
         
         Map<String, Object> requestBody = Map.of(
                 "userId", userId,
+                "username", username,
                 "amount", amount
         );
 

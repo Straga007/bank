@@ -83,6 +83,12 @@
         "client": "bank-accounts-service",
         "roles": ["ACCOUNTS_UPDATE"]
       }
+    ],
+    "bank-transfer-service": [
+      {
+        "client": "bank-accounts-service",
+        "roles": ["ACCOUNTS_UPDATE"]
+      }
     ]
   },
   "clientScopes": [
@@ -374,6 +380,53 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "accountsServiceSecret",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email",
+        "roles",
+        "web-origins",
+        "acr"
+      ],
+      "optionalClientScopes": [
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "id": "bank-transfer-service",
+      "clientId": "bank-transfer-service",
+      "name": "Transfer Service",
+      "description": "Transfer service for Bank application",
+      "rootUrl": "http://localhost:8096",
+      "adminUrl": "http://localhost:8096",
+      "baseUrl": "http://localhost:8096",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "transferServiceSecret",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,

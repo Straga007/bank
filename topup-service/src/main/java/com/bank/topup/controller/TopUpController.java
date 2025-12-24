@@ -51,7 +51,7 @@ public class TopUpController {
         logger.info("Пополнение баланса для пользователя: userId={}, userName={}, userEmail={}, amount={}", userId, userName, userEmail, amount);
         
         // Вызываем Accounts сервис для обновления баланса
-        return accountsServiceClient.updateAccountBalance(serviceToken, userId, amount)
+        return accountsServiceClient.updateAccountBalance(serviceToken, userId, userName, amount)
                 .doOnSuccess(accountsResponse -> logger.info("Баланс успешно обновлен для пользователя: {}", userId))
                 .doOnError(error -> logger.error("Ошибка при обновлении баланса для пользователя: {}", userId, error))
                 .map(accountsResponse -> {

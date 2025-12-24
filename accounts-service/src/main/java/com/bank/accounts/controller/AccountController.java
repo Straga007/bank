@@ -24,17 +24,18 @@ public class AccountController {
     
     @PostMapping("/balance/update") // Изменено с "/api/accounts/balance/update" на "/balance/update"
     public ResponseEntity<Map<String, Object>> updateBalance(@RequestBody Map<String, Object> request) {
-        logger.info("Получен запрос на обновление баланса: {}", request);
+        logger.info("Получен запрос на обновление баланса от внешнего сервиса: {}", request);
         try {
             String userId = (String) request.get("userId");
+            String username = (String) request.get("username"); // Извлекаем username из запроса
             BigDecimal amount = new BigDecimal(request.get("amount").toString());
             
-            logger.info("Обновление баланса для пользователя {} на сумму {}", userId, amount);
+            logger.info("Обработка запроса на обновление баланса для пользователя {} с username {} на сумму {}", userId, username, amount);
             
             // Обновляем баланс через сервисный слой
-            Account updatedAccount = accountService.updateBalance(userId, amount);
+            Account updatedAccount = accountService.updateBalance(userId, username, amount);
             
-            logger.info("Баланс успешно обновлен. Новый баланс: {}", updatedAccount.getBalance());
+            logger.info("Баланс успешно обновлен для пользователя {}. Новый баланс: {}", userId, updatedAccount.getBalance());
             
             // Подготовка ответа
             Map<String, Object> response = new HashMap<>();
@@ -43,12 +44,15 @@ public class AccountController {
             response.put("newBalance", updatedAccount.getBalance());
             response.put("transactionId", UUID.randomUUID().toString());
             
+            logger.info("Отправка ответа на запрос обновления баланса: {}", response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Ошибка при обновлении баланса", e);
+            logger.error("Ошибка при обработке запроса обновления баланса", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
             errorResponse.put("message", "Ошибка при обновлении баланса: " + e.getMessage());
+            
+            logger.info("Отправка ошибки на запрос обновления баланса: {}", errorResponse);
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
@@ -63,6 +67,8 @@ public class AccountController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("status", "error");
                 response.put("message", "Аккаунт не найден");
+                
+                logger.info("Отправка ошибки на запрос получения баланса: {}", response);
                 return ResponseEntity.badRequest().body(response);
             }
             
@@ -73,12 +79,16 @@ public class AccountController {
             response.put("status", "success");
             response.put("userId", userId);
             response.put("balance", account.getBalance());
+            
+            logger.info("Отправка ответа на запрос получения баланса: {}", response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Ошибка при получении баланса для пользователя {}", userId, e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
             errorResponse.put("message", "Ошибка при получении баланса: " + e.getMessage());
+            
+            logger.info("Отправка ошибки на запрос получения баланса: {}", errorResponse);
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
@@ -93,6 +103,8 @@ public class AccountController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("status", "error");
                 response.put("message", "Аккаунт не найден");
+                
+                logger.info("Отправка ошибки на запрос получения аккаунта: {}", response);
                 return ResponseEntity.badRequest().body(response);
             }
             
@@ -102,16 +114,21 @@ public class AccountController {
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("userId", account.getUserId());
+            response.put("username", account.getUsername()); // Добавляем username в ответ
             response.put("firstName", account.getFirstName());
             response.put("lastName", account.getLastName());
             response.put("birthDate", account.getBirthDate());
             response.put("balance", account.getBalance());
+            
+            logger.info("Отправка ответа на запрос получения аккаунта: {}", response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Ошибка при получении данных аккаунта для пользователя {}", userId, e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
             errorResponse.put("message", "Ошибка при получении данных аккаунта: " + e.getMessage());
+            
+            logger.info("Отправка ошибки на запрос получения аккаунта: {}", errorResponse);
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
@@ -132,16 +149,68 @@ public class AccountController {
             response.put("status", "success");
             response.put("message", "Данные аккаунта успешно обновлены");
             response.put("userId", updatedAccount.getUserId());
+            response.put("username", updatedAccount.getUsername()); // Добавляем username в ответ
             response.put("firstName", updatedAccount.getFirstName());
             response.put("lastName", updatedAccount.getLastName());
             response.put("birthDate", updatedAccount.getBirthDate());
             response.put("balance", updatedAccount.getBalance());
+            
+            logger.info("Отправка ответа на запрос обновления аккаунта: {}", response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Ошибка при обновлении данных аккаунта для пользователя {}", userId, e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
             errorResponse.put("message", "Ошибка при обновлении данных аккаунта: " + e.getMessage());
+            
+            logger.info("Отправка ошибки на запрос обновления аккаунта: {}", errorResponse);
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+    
+    // Новый эндпоинт для выполнения перевода между аккаунтами по username получателя
+    @PostMapping("/transfer-by-username")
+    public ResponseEntity<Map<String, Object>> transferByUsername(@RequestBody Map<String, Object> request) {
+        logger.info("Получен запрос на выполнение перевода по username от внешнего сервиса (transfer-service): {}", request);
+        try {
+            String senderUserId = (String) request.get("senderUserId");
+            String recipientUsername = (String) request.get("recipientUsername");
+            BigDecimal amount = new BigDecimal(request.get("amount").toString());
+            
+            logger.info("Обработка запроса на выполнение перевода от {} к пользователю с username {}, сумма: {}", senderUserId, recipientUsername, amount);
+            
+            boolean success = accountService.transferBetweenAccountsByUsername(senderUserId, recipientUsername, amount);
+            
+            if (success) {
+                logger.info("Перевод успешно выполнен от {} к пользователю с username {}, сумма: {}", senderUserId, recipientUsername, amount);
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("status", "success");
+                response.put("message", "Перевод успешно выполнен");
+                response.put("senderUserId", senderUserId);
+                response.put("recipientUsername", recipientUsername);
+                response.put("amount", amount);
+                response.put("transactionId", UUID.randomUUID().toString());
+                
+                logger.info("Отправка успешного ответа на запрос перевода по username: {}", response);
+                return ResponseEntity.ok(response);
+            } else {
+                logger.warn("Перевод не выполнен от {} к пользователю с username {}, сумма: {}", senderUserId, recipientUsername, amount);
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("status", "error");
+                response.put("message", "Перевод не выполнен (возможно, недостаточно средств, аккаунт не найден или неправильный username)");
+                
+                logger.info("Отправка ошибки на запрос перевода по username: {}", response);
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            logger.error("Ошибка при выполнении перевода по username2", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", "Ошибка при выполнении перевода по username: " + e.getMessage());
+            
+            logger.info("Отправка ошибки на запрос перевода по username: {}", errorResponse);
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }

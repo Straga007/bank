@@ -1,7 +1,11 @@
 package com.bank.frontend.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
@@ -42,6 +46,52 @@ public class ApiProxyController {
             .bodyValue(payload)
             .retrieve()
             .toEntity(Object.class)
+            .onErrorReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
+    
+    @PostMapping("/transfer/create")
+    @ResponseBody
+    public Mono<ResponseEntity<Object>> createTransfer(
+            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient,
+            @AuthenticationPrincipal OAuth2User oauth2User,
+            @RequestBody Map<String, Object> payload) {
+        
+        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        
+        // Проверим, передается ли username вместо userId
+        String recipientId = (String) payload.get("recipientUserId");
+        String recipientUsername = (String) payload.get("recipientUsername");
+        
+        String uri;
+        Map<String, Object> transferPayload;
+        
+        if (recipientUsername != null && !recipientUsername.isEmpty()) {
+            // Используем новый эндпоинт для перевода по username
+            uri = gatewayServiceUrl + "/api/transfer/create-by-username";
+            transferPayload = Map.of(
+                    "senderUserId", oauth2User.getName(), // Используем subject (sub) из JWT токена как ID отправителя
+                    "recipientUsername", recipientUsername, // передаем username как recipientUsername
+                    "amount", payload.get("amount"),
+                    "description", payload.get("description")
+            );
+        } else {
+            // Используем старый эндпоинт для перевода по userId
+            uri = gatewayServiceUrl + "/api/transfer/create";
+            transferPayload = Map.of(
+                    "senderUserId", oauth2User.getName(), // Используем subject (sub) из JWT токена как ID отправителя
+                    "recipientUserId", recipientId,
+                    "amount", payload.get("amount"),
+                    "description", payload.get("description")
+            );
+        }
+        
+        return webClient
+            .post()
+            .uri(uri)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+            .bodyValue(transferPayload)
+            .retrieve()
+            .toEntity(Object.class)  // Получаем полный ответ, включая тело
             .onErrorReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 }
