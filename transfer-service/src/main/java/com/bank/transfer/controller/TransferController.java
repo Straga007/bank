@@ -2,6 +2,7 @@ package com.bank.transfer.controller;
 
 import com.bank.transfer.dto.TransferRequestDTO;
 import com.bank.transfer.service.AccountServiceClient;
+import com.bank.transfer.client.NotificationsServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +25,11 @@ public class TransferController {
     private static final Logger logger = LoggerFactory.getLogger(TransferController.class);
 
     private final AccountServiceClient accountServiceClient;
+    private final NotificationsServiceClient notificationsServiceClient;
 
-    public TransferController(AccountServiceClient accountServiceClient) {
+    public TransferController(AccountServiceClient accountServiceClient, NotificationsServiceClient notificationsServiceClient) {
         this.accountServiceClient = accountServiceClient;
+        this.notificationsServiceClient = notificationsServiceClient;
     }
 
     // Новый эндпоинт для создания перевода по username получателя
@@ -53,7 +56,7 @@ public class TransferController {
         }
         
         return accountServiceClient.transferBetweenAccountsByUsername(accessToken, senderUserId, recipientUsername, transferRequest.getAmount())
-                .map(response -> {
+                .flatMap(response -> {
                     // Преобразуем ответ от accounts-service в Map для совместимости с frontend
                     Map<String, Object> result = new HashMap<>();
                     result.put("status", response.get("status"));
@@ -62,7 +65,16 @@ public class TransferController {
                     result.put("recipientUsername", transferRequest.getRecipientUsername()); // передаем username
                     result.put("amount", response.get("amount"));
                     result.put("description", transferRequest.getDescription());
-                    return ResponseEntity.ok((Object) result);
+                    
+                    // Отправляем уведомление о переводе
+                    String senderUsername = jwt.getClaimAsString("preferred_username");
+                    return notificationsServiceClient.sendTransferNotification(accessToken, senderUserId, senderUsername, transferRequest.getAmount(), transferRequest.getDescription())
+                            .map(notificationResponse -> ResponseEntity.ok((Object) result))
+                            .defaultIfEmpty(ResponseEntity.ok((Object) result))
+                            .onErrorResume(notificationError -> {
+                                logger.error("Ошибка при отправке уведомления о переводе, но перевод прошел успешно", notificationError);
+                                return Mono.just(ResponseEntity.ok((Object) result));
+                            });
                 })
                 .onErrorReturn(ResponseEntity.badRequest().body((Object) Map.of(
                     "status", "error",

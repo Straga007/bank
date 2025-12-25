@@ -1,6 +1,7 @@
 package com.bank.topup.controller;
 
 import com.bank.topup.client.AccountsServiceClient;
+import com.bank.topup.client.NotificationsServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +25,11 @@ public class TopUpController {
     private static final Logger logger = LoggerFactory.getLogger(TopUpController.class);
 
     private final AccountsServiceClient accountsServiceClient;
+    private final NotificationsServiceClient notificationsServiceClient;
 
-    public TopUpController(AccountsServiceClient accountsServiceClient) {
+    public TopUpController(AccountsServiceClient accountsServiceClient, NotificationsServiceClient notificationsServiceClient) {
         this.accountsServiceClient = accountsServiceClient;
+        this.notificationsServiceClient = notificationsServiceClient;
     }
 
     @PostMapping("/balance")
@@ -54,7 +57,7 @@ public class TopUpController {
         return accountsServiceClient.updateAccountBalance(serviceToken, userId, userName, amount)
                 .doOnSuccess(accountsResponse -> logger.info("Баланс успешно обновлен для пользователя: {}", userId))
                 .doOnError(error -> logger.error("Ошибка при обновлении баланса для пользователя: {}", userId, error))
-                .map(accountsResponse -> {
+                .flatMap(accountsResponse -> {
                     logger.info("Получен ответ от Accounts сервиса: {}", accountsResponse);
                     
                     // Создаем ответ
@@ -67,8 +70,17 @@ public class TopUpController {
                     response.put("transactionId", UUID.randomUUID().toString());
                     response.put("accountsServiceResponse", accountsResponse);
                     
-                    logger.info("Отправляем ответ пользователю: {}", response);
-                    return ResponseEntity.ok(response);
+                    // Отправляем уведомление о пополнении баланса
+                    return notificationsServiceClient.sendTopUpNotification(serviceToken, userId, userName, amount.toString(), "Пополнение баланса")
+                            .map(notificationResponse -> {
+                                logger.info("Уведомление о пополнении баланса успешно отправлено: {}", notificationResponse);
+                                return ResponseEntity.ok(response);
+                            })
+                            .defaultIfEmpty(ResponseEntity.ok(response))
+                            .onErrorResume(notificationError -> {
+                                logger.error("Ошибка при отправке уведомления о пополнении баланса, но операция прошла успешно", notificationError);
+                                return Mono.just(ResponseEntity.ok(response));
+                            });
                 })
                 .onErrorReturn(ResponseEntity.internalServerError().build());
     }

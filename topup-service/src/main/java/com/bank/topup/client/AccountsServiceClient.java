@@ -2,6 +2,7 @@ package com.bank.topup.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,10 @@ public class AccountsServiceClient {
 
     private final WebClient webClient;
 
-    public AccountsServiceClient(WebClient.Builder webClientBuilder) {
+    public AccountsServiceClient(WebClient.Builder webClientBuilder,
+                               @Value("${account.service.url:http://localhost:8000/api/accounts}") String accountServiceUrl) {
         this.webClient = webClientBuilder
-                .baseUrl("http://localhost:8000/api/accounts") // Используем gateway
+                .baseUrl(accountServiceUrl)
                 .build();
     }
 

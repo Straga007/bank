@@ -23,7 +23,10 @@ spring:
 
 account:
   service:
-
+    url: http://localhost:8000/api/accounts
+notifications:
+  service:
+    url: http://localhost:8093/api/notifications
 
 logging:
   level:

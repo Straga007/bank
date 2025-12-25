@@ -1,9 +1,9 @@
 server:
-  port: 8094
+  port: 8093
 
 spring:
   application:
-    name: topup-service
+    name: notifications-service
   security:
     oauth2:
       resourceserver:
@@ -13,22 +13,15 @@ spring:
         registration:
           keycloak:
             provider: keycloak
-            client-id: bank-topup-service
-            client-secret: topupServiceSecret
+            client-id: bank-notifications-service
+            client-secret: notificationsServiceSecret
             authorization-grant-type: client_credentials
             scope: openid,profile,email,roles
         provider:
           keycloak:
             token-uri: http://localhost:8180/realms/bank/protocol/openid-connect/token
 
-account:
-  service:
-    url: http://localhost:8000/api/accounts
-notifications:
-  service:
-    url: http://localhost:8093/api/notifications
-
 logging:
   level:
     org.springframework.security: DEBUG
-    com.bank.topup: DEBUG
+    com.bank.notifications: DEBUG
