@@ -13,24 +13,17 @@ public class NotificationService {
     
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
     
-    // Временное хранилище для уведомлений (в реальном приложении использовалась бы база данных)
+    // Временное хранилище для уведомлений (в реальном используем базу данных)
     private final List<Notification> notifications = new ArrayList<>();
     
     public void sendNotification(Notification notification) {
         logger.info("Отправка уведомления: {}", notification);
         
-        // Здесь может быть логика отправки уведомления (email, SMS, push-уведомление и т.д.)
-        // Для простоты в этом примере мы просто добавляем уведомление в список и логируем его
-        
+        // Здесь должна быть логика отправки уведомления
         notifications.add(notification);
         logger.info("Уведомление успешно отправлено для пользователя {}: {}", notification.getUserId(), notification.getDescription());
         
-        // В реальном приложении здесь может быть:
-        // - Отправка email
-        // - Отправка SMS
-        // - Отправка push-уведомления
-        // - Запись в базу данных
-        // - Отправка в очередь (например, RabbitMQ или Kafka)
+        // заглушка для тестирования
     }
     
     public List<Notification> getAllNotifications() {

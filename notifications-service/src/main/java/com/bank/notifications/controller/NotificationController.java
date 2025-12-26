@@ -27,7 +27,6 @@ public class NotificationController {
         logger.info("Получен запрос на отправку уведомления: {}", request);
         
         try {
-            // Создаем модель уведомления из DTO
             Notification notification = new Notification(
                     request.getUserId(),
                     request.getUserName(),
@@ -36,10 +35,8 @@ public class NotificationController {
                     request.getDescription()
             );
             
-            // Отправляем уведомление через сервис
             notificationService.sendNotification(notification);
             
-            // Подготавливаем успешный ответ
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("message", "Уведомление успешно отправлено");
