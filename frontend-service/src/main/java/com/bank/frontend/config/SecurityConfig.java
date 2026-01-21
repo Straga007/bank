@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .sessionFixation().migrateSession()
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/login/oauth2/**")
+                .ignoringRequestMatchers("/login/oauth2/**", "/api/**")
             )
             .oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("/dashboard", true)

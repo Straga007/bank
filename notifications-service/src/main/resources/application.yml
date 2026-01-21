@@ -1,0 +1,27 @@
+server:
+  port: 8093
+
+spring:
+  application:
+    name: notifications-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/bank
+      client:
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: bank-notifications-service
+            client-secret: notificationsServiceSecret
+            authorization-grant-type: client_credentials
+            scope: openid,profile,email,roles
+        provider:
+          keycloak:
+            token-uri: http://localhost:8180/realms/bank/protocol/openid-connect/token
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.bank.notifications: DEBUG

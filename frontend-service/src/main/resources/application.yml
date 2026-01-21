@@ -26,6 +26,10 @@ spring:
     suffix: .html
     cache: false
 
+gateway:
+  service:
+    url: http://localhost:8000
+
 logging:
   level:
     org.springframework.security: DEBUG
